@@ -17,7 +17,7 @@
 		<PackageReadmeFile>GlobalTool.md</PackageReadmeFile>
 		<PackageReleaseNotes>https://github.com/pregress/ApimSanitizer/blob/main/Documentation/Changelog.md</PackageReleaseNotes>
 		<PackageIconUrl>https://github.com/pregress/ApimSanitizer/blob/main/_assets/icon.png</PackageIconUrl>
-		<PackageIcon>coverlet-icon.png</PackageIcon>
+		<PackageIcon>icon.png</PackageIcon>
 		<PackageProjectUrl>https://github.com/pregress/ApimSanitizer</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryType>git</RepositoryType>
