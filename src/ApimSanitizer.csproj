@@ -12,6 +12,7 @@
 	<PropertyGroup>
 		<PackageId>dotnet-apimsanitizer</PackageId>
 		<Authors>Pregress</Authors>
+		<VersionPrefix>1.0.0</VersionPrefix>
 		<Description>Sanitize open api defintion files to import them into Azure APIM.</Description>
 		<PackageTags>azure;apim;tool</PackageTags>
 		<PackageReadmeFile>GlobalTool.md</PackageReadmeFile>
