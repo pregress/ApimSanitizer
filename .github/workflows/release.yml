@@ -16,13 +16,14 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - id: get_version
-        name: Get version
-        uses: jannemattila/get-version-from-tag@v3
+      - uses: nowsprinting/check-version-format-action@v3
+        id: version
+        with:
+          prefix: 'v'
 
       - name: Update Assembly and NuGet package version
         run: |
-          version=${{ steps.get_version.outputs.version }}
+          version=${{ steps.version.outputs.full_without_prefix }}
           echo "Updating Assembly and NuGet package versions to ${version}"
           sed -i "s/<VersionPrefix>.*<\/VersionPrefix>/<VersionPrefix>${version}<\/VersionPrefix>/g" ./ApimSanitizer.csproj
         working-directory: src
