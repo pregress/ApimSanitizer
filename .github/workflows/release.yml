@@ -31,20 +31,22 @@ jobs:
           version=${{ steps.get_version.outputs.version }}
           echo "Updating Assembly and NuGet package versions to ${version}"
           sed -i "s/<VersionPrefix>.*<\/VersionPrefix>/<VersionPrefix>${version}<\/VersionPrefix>/g" ./src/ApimSanitizer.csproj
-          sed -i "s/\[assembly: AssemblyVersion(\".*\"\]/[assembly: AssemblyVersion(\"${version}\")]/g" ./src/Properties/AssemblyInfo.cs
-          sed -i "s/\[assembly: AssemblyFileVersion(\".*\"\]/[assembly: AssemblyFileVersion(\"${version}\")]/g" ./src/Properties/AssemblyInfo.cs
+        working-directory: src
 
       - name: Build the project
         run: dotnet build --configuration Release
+        working-directory: src
 
       - name: Pack the NuGet package
         run: dotnet pack --configuration Release --output ./artifacts
+        working-directory: src
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: nuget-package
           path: ./artifacts/*.nupkg
+          working-directory: src
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
@@ -61,6 +63,8 @@ jobs:
 
       # - name: Push NuGet package to nuget.org
       #   run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      #   working-directory: src
 
       - name: Push NuGet package to GitHub packages
         run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        working-directory: src
