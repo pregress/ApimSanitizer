@@ -16,21 +16,15 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Set up Git for tagging
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-      - name: Extract version from tag
-        id: get_version
-        run: |
-          echo "##[set-output name=version;]${GITHUB_REF##*/}"
+      - id: get_version
+        name: Get version
+        uses: jannemattila/get-version-from-tag@v3
 
       - name: Update Assembly and NuGet package version
         run: |
           version=${{ steps.get_version.outputs.version }}
           echo "Updating Assembly and NuGet package versions to ${version}"
-          sed -i "s/<VersionPrefix>.*<\/VersionPrefix>/<VersionPrefix>${version}<\/VersionPrefix>/g" ./src/ApimSanitizer.csproj
+          sed -i "s/<VersionPrefix>.*<\/VersionPrefix>/<VersionPrefix>${version}<\/VersionPrefix>/g" ./ApimSanitizer.csproj
         working-directory: src
 
       - name: Build the project
@@ -57,7 +51,9 @@ jobs:
             Release version ${{ steps.get_version.outputs.version }}.
           draft: false
           prerelease: false
-          files: ./artifacts/*.nupkg
+          files: ./artifacts/*.nupkg          
+          working-directory: src
+        
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
