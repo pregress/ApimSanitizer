@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<PackAsTool>true</PackAsTool>
+	<ToolCommandName>apimsanitizer</ToolCommandName>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>apimsanitizer</PackageId>
+		<Authors>Pregress</Authors>
+		<Description>Sanitize open api defintion files to import them into Azure APIM.</Description>
+		<PackageTags>azure;apim;tool</PackageTags>
+		<PackageReadmeFile>GlobalTool.md</PackageReadmeFile>
+		<PackageReleaseNotes>https://github.com/pregress/ApimSanitizer/blob/main/Documentation/Changelog.md</PackageReleaseNotes>
+		<PackageIconUrl>https://github.com/pregress/ApimSanitizer/blob/main/_assets/icon.png</PackageIconUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageProjectUrl>https://github.com/pregress/ApimSanitizer</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="YamlDotNet" Version="16.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+  	<None Include="$(MSBuildThisFileDirectory)..\_assets\icon.png" Pack="true" PackagePath="\" />
+  	<None Include="..\Documentation\GlobalTool.md" Link="GlobalTool.md" Pack="true" PackagePath="\">
+  		<PackageCopyToOutput>true</PackageCopyToOutput>
+  	</None>
+  </ItemGroup>
+
+</Project>
