@@ -1,0 +1,66 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # This workflow runs when a tag is pushed that starts with 'v'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Set up Git for tagging
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          echo "##[set-output name=version;]${GITHUB_REF##*/}"
+
+      - name: Update Assembly and NuGet package version
+        run: |
+          version=${{ steps.get_version.outputs.version }}
+          echo "Updating Assembly and NuGet package versions to ${version}"
+          sed -i "s/<VersionPrefix>.*<\/VersionPrefix>/<VersionPrefix>${version}<\/VersionPrefix>/g" ./src/ApimSanitizer.csproj
+          sed -i "s/\[assembly: AssemblyVersion(\".*\"\]/[assembly: AssemblyVersion(\"${version}\")]/g" ./src/Properties/AssemblyInfo.cs
+          sed -i "s/\[assembly: AssemblyFileVersion(\".*\"\]/[assembly: AssemblyFileVersion(\"${version}\")]/g" ./src/Properties/AssemblyInfo.cs
+
+      - name: Build the project
+        run: dotnet build --configuration Release
+
+      - name: Pack the NuGet package
+        run: dotnet pack --configuration Release --output ./artifacts
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: nuget-package
+          path: ./artifacts/*.nupkg
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
+          body: |
+            Release version ${{ steps.get_version.outputs.version }}.
+          draft: false
+          prerelease: false
+          files: ./artifacts/*.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Push NuGet package to nuget.org
+      #   run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
+      - name: Push NuGet package to GitHub packages
+        run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
