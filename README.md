@@ -6,15 +6,30 @@ Currenlty only removes [links](https://swagger.io/docs/specification/v3_0/links/
 
 
 # Install
+
+## Global
 ```
 dotnet tool install -g apimsanitizer
 ```
 
+## In project
+```
+dotnet tool install dotnet-apimsanitizer --create-manifest-if-needed
+```
+
 # Usage
+
+## CLI
 ```
 apimsanitizer -f ./your/path/to/api-definition.yml
 ```
 
+## PreBuild target in csproj
+```(xml)
+<Target Name="GenerateApimFile" BeforeTargets="Build">
+    <Exec Command="dotnet apimsanitizer -f $(ProjectDir)/wwwroot/openapi.yml" />
+</Target>
+```
 
 ## Local testing
 
