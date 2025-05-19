@@ -57,6 +57,7 @@ rootCommand.SetHandler((file) =>
         var openApiDoc = deserializer.Deserialize<object>(yamlContent);
 
         RemoveLinksRecursive(openApiDoc);
+        ReplaceExamplesRecursive(openApiDoc);
 
         var modifiedYaml = serializer.Serialize(openApiDoc);
 
@@ -82,7 +83,9 @@ return exitCode;
 static void RemoveLinksRecursive(object? node)
 {
     if (node is null)
+    {
         return;
+    }
 
     if (node is System.Collections.IDictionary dict)
     {
@@ -101,6 +104,80 @@ static void RemoveLinksRecursive(object? node)
         foreach (var item in list)
         {
             RemoveLinksRecursive(item);
+        }
+    }
+}
+
+static void ReplaceExamplesRecursive(object? node)
+{
+    if (node == null)
+        return;
+
+    if (node is System.Collections.IDictionary dict)
+    {
+        var keys = new List<object?>(dict.Keys.Cast<object?>());
+
+        foreach (var key in keys)
+        {
+            string? keyStr = key?.ToString();
+            if (keyStr != null && string.Equals(keyStr, "examples", StringComparison.OrdinalIgnoreCase))
+            {
+                var examplesValue = dict[key];
+                if (examplesValue != null)
+                {
+                    object? firstExample = null;
+                        
+                    // Handle different types that YamlDotNet might use
+                    if (examplesValue is System.Collections.IDictionary examplesDict && examplesDict.Count > 0)
+                    {
+                        // Get first example from dictionary
+                        var firstKey = examplesDict.Keys.Cast<object?>().FirstOrDefault();
+                        if (firstKey != null)
+                        {
+                            firstExample = examplesDict[firstKey];
+                        }
+                    }
+                    else if (examplesValue is System.Collections.IList examplesList && examplesList.Count > 0)
+                    {
+                        // Get first example from list
+                        firstExample = examplesList[0];
+                    }
+                    else
+                    {
+                        // Just use the value directly as the example
+                        firstExample = examplesValue;
+                    }
+
+                    if (firstExample != null)
+                    {
+                        // Remove the "examples" key and add "example" with the first example
+                        dict.Remove(key);
+                        dict["example"] = firstExample;
+                    }
+                }
+            }
+            else if (dict[key] != null)
+            {
+                // Recursively process this value
+                ReplaceExamplesRecursive(dict[key]);
+            }
+        }
+    }
+    // For lists/arrays in YAML
+    else if (node is System.Collections.IList list)
+    {
+        // Process each item in the list
+        foreach (var item in list)
+        {
+            ReplaceExamplesRecursive(item);
+        }
+    }
+    // For dictionary values we need to examine (could be wrapped in another type)
+    else if (node is System.Collections.IEnumerable enumerable && !(node is string))
+    {
+        foreach (var item in enumerable)
+        {
+            ReplaceExamplesRecursive(item);
         }
     }
 }
