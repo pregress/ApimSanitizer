@@ -15,7 +15,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - uses: nowsprinting/check-version-format-action@v3
         id: version
@@ -41,8 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nuget-package
-          path: ./artifacts/*.nupkg
-          working-directory: src
+          path: ./src/artifacts/*.nupkg
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
@@ -59,8 +58,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: NuGet login (trusted publishing)
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push NuGet package to nuget.org
-        run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
         working-directory: src
 
       - name: Push NuGet package to GitHub packages
